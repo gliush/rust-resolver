@@ -1,0 +1,12 @@
+[package]
+
+name = "resolver"
+version = "0.0.1"
+authors = ["ivan.glushkov@gmail.com"]
+
+[[bin]]
+name="main"
+path="src/main.rs"
+
+//[dependencies.hyper]
+//git = "https://github.com/hyperium/hyper.git"
