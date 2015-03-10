@@ -8,5 +8,8 @@ authors = ["ivan.glushkov@gmail.com"]
 name="main"
 path="src/main.rs"
 
-//[dependencies.hyper]
-//git = "https://github.com/hyperium/hyper.git"
+#[dependencies.hyper]
+#git = "https://github.com/hyperium/hyper.git"
+[dependencies.hyper]
+git = "https://github.com/hyperium/hyper.git"
+rev = "2ce4385c163e1a9a393c89743cf04e047b776e83"
