@@ -1,3 +1,7 @@
+#![feature(core)]
+#![feature(io)]
+#![feature(collections)]
+
 mod resolver;
 
 fn main() {
