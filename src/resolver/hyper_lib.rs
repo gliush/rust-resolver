@@ -5,6 +5,7 @@ use std::io::Read;
 
 extern crate hyper;
 use self::hyper::Client;
+use self::hyper::client::RedirectPolicy;
 //use self::hyper::Url;
 //use self::hyper::client::Request;
 //use self::hyper::status::StatusCode;
@@ -30,6 +31,7 @@ use self::core::num::ToPrimitive;
 
 pub fn http_get(url: &str) -> (Option<u16>, Option<String>, Option<String>, String) {
     let mut client = Client::new();
+    client.set_redirect_policy(RedirectPolicy::FollowNone);
     let mut res = client.get(url) 
         .header(Accept(vec![
             qitem(Mime(Text, Html, vec![])),
@@ -41,6 +43,9 @@ pub fn http_get(url: &str) -> (Option<u16>, Option<String>, Option<String>, Stri
     let mut body = String::new();
     res.read_to_string(&mut body).unwrap();
     //println!("body:{}", body);
+    //println!("res.status:{:?}", res.status);
+    //println!("res.headers:{:?}", res.headers);
+    //println!("res.version:{:?}", res.version);
 
     let ct = res.headers.get::<ContentType>().map(repr_header);
     let l = res.headers.get::<Location>().map(repr_header);
