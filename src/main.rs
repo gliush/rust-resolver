@@ -5,5 +5,5 @@
 mod resolver;
 
 fn main() {
-    println!("result:{:?}", resolver::resolve("http://ya.ru"));
+    println!("result:{:?}", resolver::resolver_lib::resolve("http://ya.ru"));
 }
