@@ -26,10 +26,8 @@ pub fn resolve(x: &str) ->  Result<Page, String>{
         Ok(_) => {
             let (status, content_type, location, body) = hyper_lib::http_get(x);
 
-            println!("status:{:?}", status);
-            println!("ct:{:?}", content_type );
-            println!("l:{:?}", location );
-            println!("body: {}", body.len());
+            println!(" resolve({}) -> status:{:?} ct:{:?} l:{:?} body:{}", 
+                x, status, content_type, location, body.len());
             Ok(Page {
                 orig_url: String::from_str(""),
                 resolved_url: String::from_str(""), 
