@@ -37,11 +37,19 @@ fn resolve_ll(attempt: u8, x: &str, mut res: Box<Page>) ->  Result<Box<Page>, St
                     Ok(res)
                 },
                 Some(300) => {
-                    let msg = format!("url {} is a redirects while location is not set", x);
-                    assert!(location.is_some(), msg);
-                    let l = location.unwrap();
                     res.redirects.push(String::from_str(x));
-                    resolve_ll(attempt+1, &l, res)
+                    match location {
+                        Some(l) => {
+                            let url = reconstruct_url(l, x);
+                            resolve_ll(attempt+1, &url, res)
+                        },
+                        None => {
+                            let msg = format!("url {} is a redirects while location is not set", x);
+                            println!("{}", msg);
+                            res.resolved_url = Some(String::from_str(x));
+                            Ok(res)
+                        }
+                    }
                 },
                 _ => Ok(res)
             }
@@ -51,5 +59,17 @@ fn resolve_ll(attempt: u8, x: &str, mut res: Box<Page>) ->  Result<Box<Page>, St
             println!("{}", msg);
             Err(msg)
         }
+    }
+}
+
+fn reconstruct_url(location: String, prev_url: &str) ->  String {
+    match location {
+        _ if &location[0..4] == "http" => location,
+        _ if location.as_bytes()[0] == b'/' && &prev_url[0..3] == "http" => {
+            let mut new_url = String::from_str(prev_url);
+            new_url.push_str(location.as_slice());
+            new_url
+        },
+        _ => String::from_str(prev_url)
     }
 }
