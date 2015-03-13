@@ -29,7 +29,7 @@ use self::hyper::header::HeaderFormat;
 extern crate core;
 use self::core::num::ToPrimitive;
 
-pub fn http_get(url: &str) -> (Option<u16>, Option<String>, Option<String>, String) {
+pub fn http_get(url: &str) -> (Option<u16>, Option<String>, Option<String>, Option<String>) {
     let mut client = Client::new();
     client.set_redirect_policy(RedirectPolicy::FollowNone);
     let mut res = client.get(url) 
@@ -40,9 +40,13 @@ pub fn http_get(url: &str) -> (Option<u16>, Option<String>, Option<String>, Stri
         .header(UserAgent("Mozilla/5.0 (X11; CrOS x86_64 6158.70.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.110 Safari/537.36".to_string()))
         .send().unwrap();
 
-    let mut body = String::new();
-    res.read_to_string(&mut body).unwrap();
-    //println!("body:{}", body);
+    let mut body_raw = String::new();
+    res.read_to_string(&mut body_raw).unwrap();
+    let body = match body_raw.is_empty() {
+        true => None,
+        _ => Some(body_raw)
+    };
+    //println!("body_raw:{}", body_raw);
     //println!("res.status:{:?}", res.status);
     //println!("res.headers:{:?}", res.headers);
     //println!("res.version:{:?}", res.version);

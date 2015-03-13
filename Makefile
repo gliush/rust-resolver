@@ -1,4 +1,4 @@
-.PHONY: run build test doc clean
+.PHONY: run build test doc clean tags
 run build test doc clean:
 	cargo $@
 

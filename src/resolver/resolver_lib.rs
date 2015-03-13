@@ -28,12 +28,14 @@ fn resolve_ll(attempt: u8, x: &str, mut res: Box<Page>) ->  Result<Box<Page>, St
         Ok(_) => {
             let (status, content_type, location, body) = hyper_lib::http_get(x);
 
-            println!(" resolve({}) -> at:{} st:{:?} ct:{:?} l:{:?} r:{} body:{}", 
-                x, attempt, status, content_type, location, format!("{:?}", res.redirects), body.len());
+            let body_len = body.as_ref().map(String::len);
+            println!(" resolve({}) -> at:{} st:{:?} ct:{:?} l:{:?} r:{} body:{:?}", 
+                x, attempt, status, content_type, location, format!("{:?}", res.redirects), body_len);
 
             match status {
                 Some(200) => { 
                     res.resolved_url = Some(String::from_str(x));
+                    res.title = body.and_then(|s| {extract_title(&s)});
                     Ok(res)
                 },
                 Some(300) => {
@@ -72,4 +74,8 @@ fn reconstruct_url(location: String, prev_url: &str) ->  String {
         },
         _ => String::from_str(prev_url)
     }
+}
+
+fn extract_title(body: &str) -> Option<String> {
+    Some(String::from_str(body))
 }
