@@ -8,11 +8,14 @@ authors = ["ivan.glushkov@gmail.com"]
 name="main"
 path="src/main.rs"
 
-#[dependencies.hyper]
-#git = "https://github.com/hyperium/hyper.git"
+[dependencies.regex]
+git = "https://github.com/rust-lang/regex.git"
+#rev = "056a21d4f0144a26ffff6688e1657953083b0efa"
+
 [dependencies.hyper]
 git = "https://github.com/hyperium/hyper.git"
 rev = "2ce4385c163e1a9a393c89743cf04e047b776e83"
 
 [dependencies.url]
 git = "https://github.com/servo/rust-url"
+

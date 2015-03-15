@@ -1,5 +1,5 @@
 #![feature(core)]
-#![feature(io)]
+//#![feature(io)]
 #![feature(collections)]
 
 mod resolver;

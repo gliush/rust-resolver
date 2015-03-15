@@ -1,9 +1,13 @@
+extern crate regex;
+use self::regex::Regex;
+
 extern crate url;
 use self::url::Url;
 //use self::url::ParseResult;
 //use self::url::ParseError;
 
 use resolver::hyper_lib;
+
 
 #[derive(Debug)]
 struct Page {
@@ -77,5 +81,30 @@ fn reconstruct_url(location: String, prev_url: &str) ->  String {
 }
 
 fn extract_title(body: &str) -> Option<String> {
-    Some(String::from_str(body))
+    meta_value(body, "og:title")
+        .or_else(|| {html_value(body, "title")})
+}
+
+fn meta_value(body: &str, tag: &'static str) -> Option<String> {
+    //// do not allow newlines in content, trim
+    let value_quoted1  = "'\\s*([^'\n]+?)\\s*'";
+    let value_quoted2  = "\"\\s*([^\"\n]+?)\\s*\"";
+    let value_unquoted = "\\s*([^\\s'\"\n>][^>\n]*?)";
+    let str_re = String::from_str("(?ims)<meta\\s+property=['\"]?") + tag + "['\"]?\\s+"
+            + "content=(" + value_quoted1 + "|" + value_quoted2 + "|" + value_unquoted + ")\\s*/?>";
+
+    let re = Regex::new(&str_re).unwrap();
+    match re.captures(body) {
+        None => None,
+        Some(caps) => caps.at(1).map(|s| {String::from_str(s)})
+    }
+}
+
+fn html_value(body: &str, tag: &'static str) -> Option<String> {
+    let str_re = String::from_str("(?ims)<") + tag + ">\\s*(.+?)\\s*</" + tag + ">";
+    let re = Regex::new(&str_re).unwrap();
+    match re.captures(body) {
+        None => None,
+        Some(caps) => caps.at(1).map(|s| {String::from_str(s)})
+    }
 }
