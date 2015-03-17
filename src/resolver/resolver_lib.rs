@@ -17,6 +17,15 @@ struct Page {
     redirects: Vec<String>
 }
 
+impl PartialEq for Page {
+    fn eq(&self, other: &Self) -> bool {
+        self.orig_url == other.orig_url
+            && self.resolved_url == other.resolved_url
+            && self.title == other.title
+            && self.redirects == other.redirects
+    }
+}
+
 pub fn resolve(x: &str) ->  Result<Box<Page>, String>{
     let res = Box::new(Page {
         orig_url: String::from_str(x),
@@ -27,10 +36,29 @@ pub fn resolve(x: &str) ->  Result<Box<Page>, String>{
     resolve_ll(0, x, res)
 }
 
+#[cfg(not(test))]
+fn http_get(x: &str) -> (Option<u16>, Option<String>, Option<String>, Option<String>) {
+    hyper_lib::http_get(x)
+}
+
+#[cfg(test)]
+fn http_get(x: &str) -> (Option<u16>, Option<String>, Option<String>, Option<String>) {
+    let html_content_type = Some(String::from_str("text/html; charset=UTF-8"));
+    let loc_example_com = Some(String::from_str("http://example.com"));
+    let body1 = Some(String::from_str(""));
+    
+    match x {
+        "example.com" => (Some(200), html_content_type, None, body1),
+        "redir1_to_example.com" => (Some(300), None, loc_example_com, None),
+        _ => (None, None, None, None)
+    }
+}
+
 fn resolve_ll(attempt: u8, x: &str, mut res: Box<Page>) ->  Result<Box<Page>, String>{
+    println!("resolve_ll({}, {}, {:?})", attempt, x, res);
     match Url::parse(x) {
         Ok(_) => {
-            let (status, content_type, location, body) = hyper_lib::http_get(x);
+            let (status, content_type, location, body) = http_get(x);
 
             let body_len = body.as_ref().map(String::len);
             println!(" resolve({}) -> at:{} st:{:?} ct:{:?} l:{:?} r:{} body:{:?}", 
@@ -80,6 +108,7 @@ fn reconstruct_url(location: String, prev_url: &str) ->  String {
     }
 }
 
+ 
 fn extract_title(body: &str) -> Option<String> {
     meta_value(body, "og:title")
         .or_else(|| {html_value(body, "title")})
@@ -106,5 +135,22 @@ fn html_value(body: &str, tag: &'static str) -> Option<String> {
     match re.captures(body) {
         None => None,
         Some(caps) => caps.at(1).map(|s| {String::from_str(s)})
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        assert!(true);
+    }
+
+    #[test]
+    fn check_redirect() {
+        let r : Result<Box<super::Page>, String> = Err(String::from_str("hello"));
+        println!("res: {:?}", super::http_get("redir1_to_example.com"));
+        assert_eq!(resolve("redir1_to_example.com"), r);
     }
 }
